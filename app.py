@@ -123,6 +123,12 @@ with tab2:
 
     if st.button("🚀 Calculate Estimated Salary"):
         try:
+                        # 🛠️ Fix scikit-learn version mismatch crash
+            import sklearn.metrics._scorer
+            if not hasattr(sklearn.metrics._scorer, '_passthrough_scorer'):
+                sklearn.metrics._scorer._passthrough_scorer = lambda estimator, *args, **kwargs: estimator.score(*args, **kwargs)
+
+            
             # 1. Load the model from your exact subfolder location ('models/model.pkl')
             with open('models/model.pkl', 'rb') as f:
                 model = pickle.load(f)
