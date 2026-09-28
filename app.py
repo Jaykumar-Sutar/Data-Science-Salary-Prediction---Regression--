@@ -103,7 +103,6 @@ with tab1:
             st.info("💡 Insight: Noticeable upward progression curves scale linearly with seniority tier sets.")
 
 # ------------------------------------------
-# # ------------------------------------------
 # TAB 2: ML PREDICTION INTERFACE
 # ------------------------------------------
 with tab2:
@@ -115,14 +114,17 @@ with tab2:
         role = st.selectbox("Target Job Title:", ["Data Scientist", "Data Analyst", "Machine Learning Engineer", "Data Engineer", "AI Architect"])
         experience_label = st.selectbox("Experience Level:", ["Entry-level", "Mid-level", "Senior", "Executive"])
         remote_ratio = st.radio("Remote Work Type:", ["On-site (0%)", "Hybrid (50%)", "Fully Remote (100%)"])
+        employment_type = st.selectbox("Employment Type:", ["Full-time (FT)", "Part-time (PT)", "Contract (CT)", "Freelance (FL)"])
         
     with col_input2:
         company_size = st.selectbox("Target Company Size:", ["Small Startup (S)", "Mid-Market Firm (M)", "Enterprise Tech Giant (L)"])
-        location = st.selectbox("Employee Location Base:", ["India (IN)", "United States (US)", "United Kingdom (GB)", "Germany (DE)", "Canada (CA)"])
+        location = st.selectbox("Company Location:", ["India (IN)", "United States (US)", "United Kingdom (GB)", "Germany (DE)", "Canada (CA)"])
+        residence = st.selectbox("Employee Residence Base:", ["India (IN)", "United States (US)", "United Kingdom (GB)", "Germany (DE)", "Canada (CA)"])
+        work_year = st.slider("Forecast Target Year:", min_value=2023, max_value=2026, value=2024)
 
     if st.button("🚀 Calculate Estimated Salary"):
         try:
-            # 🛠️ FORCED COMPATIBILITY PATCH FOR SCIEKIT-LEARN VERSION MISMATCH
+            # 🛠️ FORCED COMPATIBILITY PATCH FOR SCIKIT-LEARN VERSION MISMATCH
             import sklearn.metrics._scorer
             
             def mock_passthrough(*args, **kwargs):
@@ -144,47 +146,56 @@ with tab2:
             # 3. Map Remote Work text choices back to numeric ratios
             encoded_remote = 0 if remote_ratio == "On-site (0%)" else 50 if remote_ratio == "Hybrid (50%)" else 100
             
-                       # 3. Map Remote Work text choices back to numeric ratios
-            encoded_remote = 0 if remote_ratio == "On-site (0%)" else 50 if remote_ratio == "Hybrid (50%)" else 100
-            
-            # 4. Construct the precise Dataframe structure your model expects
+            # Extract standard abbreviations from text choices
+            emp_type_code = employment_type.split("(")[-1].replace(")", "")
+            comp_size_code = company_size.split("(")[-1].replace(")", "")
+            location_code = location.split("(")[-1].replace(")", "")
+            residence_code = residence.split("(")[-1].replace(")", "")
+
+            # 4. Construct the precise Dataframe structure with exactly 8 columns
             input_data = pd.DataFrame([{
+                'work_year': int(work_year),
                 'experience_level': encoded_experience,
-                'remote_ratio': encoded_remote,
+                'employment_type': emp_type_code,
                 'job_title': role,
-                'company_size': company_size, 
-                'company_location': location
+                'employee_residence': residence_code,
+                'remote_ratio': encoded_remote,
+                'company_location': location_code,
+                'company_size': comp_size_code
             }])
             
             # 🛠️ CONVERT TEXT COLUMNS TO CATEGORY TYPE FOR XGBOOST
-            for col in ['job_title', 'company_size', 'company_location']:
-                input_data[col] = input_data[col].astype('category')
-            
-            # 5. Run the actual machine learning prediction using your binary file
-            predicted_array = model.predict(input_data)
-
+            categorical_cols = ['employment_type', 'job_title', 'employee_residence', 'company_location', 'company_size']
+            for col in categorical_cols:
+                if col in input_data.columns:
+                    input_data[col] = input_data[col].astype('category')
             
             # 5. Run the actual machine learning prediction using your binary file
             predicted_array = model.predict(input_data)
             predicted_salary = float(predicted_array)
             
+            # NOTE: If your notebook used a log transformation, un-comment the line below:
+            # predicted_salary = np.expm1(predicted_salary)
+            
             # 6. Display the final real AI prediction outputs
             st.success(f"### Predicted Salary Value: **${predicted_salary:,.2f} USD / year**")
             st.metric(label="Calculated Base Value Target (USD)", value=f"${predicted_salary:,.0f}")
             
-                except FileNotFoundError:
+        except FileNotFoundError:
             st.error("⚠️ The file 'models/model.pkl' was not found. Please make sure the 'models' folder exists in your GitHub repository.")
         except Exception as e:
             st.error(f"Prediction Pipeline Error: {e}")
-            # 🛠️ ADDED DEBUG ENGINE LINES
             if 'model' in locals():
                 try:
                     if hasattr(model, 'feature_names_in_'):
-                        st.info(f"📋 **The model expects these exact columns:** {list(model.feature_names_in_)}")
+                        st.info(f"📋 **Expected columns:** {list(model.feature_names_in_)}")
                     elif hasattr(model, 'best_estimator_') and hasattr(model.best_estimator_, 'feature_names_in_'):
-                        st.info(f"📋 **The model expects these exact columns:** {list(model.best_estimator_.feature_names_in_)}")
+                        st.info(f"📋 **Expected columns:** {list(model.best_estimator_.feature_names_in_)}")
                 except:
                     pass
+            
+        st.caption("ℹ️ Model Estimation Note: Outputs reflect predictive trends generated via Feature Engineering & Tuned XGBoost Regression modeling scripts.")
+
 
 # ------------------------------------------
 # TAB 3: SHOWCASING YOUR SQL CAPABILITIES
