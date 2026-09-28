@@ -172,10 +172,13 @@ with tab2:
             
             # 5. Run the actual machine learning prediction using your binary file
             predicted_array = model.predict(input_data)
-            predicted_salary = float(predicted_array)
-            
-            # NOTE: If your notebook used a log transformation, un-comment the line below:
-            # predicted_salary = np.expm1(predicted_salary)
+
+# Safely extract the single value out of the array for NumPy 2.x
+if hasattr(predicted_array, "flatten"):
+    predicted_salary = float(predicted_array.flatten()[0])
+else:
+    predicted_salary = float(predicted_array)
+
             
             # 6. Display the final real AI prediction outputs
             st.success(f"### Predicted Salary Value: **${predicted_salary:,.2f} USD / year**")
