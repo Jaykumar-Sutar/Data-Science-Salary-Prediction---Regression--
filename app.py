@@ -173,11 +173,11 @@ with tab2:
             # 5. Run the actual machine learning prediction using your binary file
             predicted_array = model.predict(input_data)
 
-# Safely extract the single value out of the array for NumPy 2.x
-if hasattr(predicted_array, "flatten"):
-    predicted_salary = float(predicted_array.flatten()[0])
-else:
-    predicted_salary = float(predicted_array)
+            # Safely extract the single value out of the array for NumPy 2.x
+            if hasattr(predicted_array, "flatten"):
+            predicted_salary = float(predicted_array.flatten()[0])
+            else:
+            predicted_salary = float(predicted_array)
 
             
             # 6. Display the final real AI prediction outputs
