@@ -7,6 +7,8 @@ import seaborn as sns
 import warnings
 import os
 import glob
+import pickle  # Added to load the real model pickle file
+
 warnings.filterwarnings("ignore")
 
 # ==========================================
@@ -100,7 +102,7 @@ with tab1:
             st.info("💡 Insight: Noticeable upward progression curves scale linearly with seniority tier sets.")
 
 # ------------------------------------------
-# TAB 2: # ML PREDICTION INTERFACE
+# TAB 2: ML PREDICTION INTERFACE
 # ------------------------------------------
 with tab2:
     st.subheader("🔮 Predict Your Market Value")
@@ -109,7 +111,9 @@ with tab2:
     col_input1, col_input2 = st.columns(2)
     with col_input1:
         role = st.selectbox("Target Job Title:", ["Data Scientist", "Data Analyst", "Machine Learning Engineer", "Data Engineer", "AI Architect"])
-        experience = st.slider("Years of Core Experience:", min_value=0, max_value=15, value=3)
+        
+        # Switched to a selectbox to align with your project document's Label Encoder
+        experience_label = st.selectbox("Experience Level:", ["Entry-level", "Mid-level", "Senior", "Executive"])
         remote_ratio = st.radio("Remote Work Type:", ["On-site (0%)", "Hybrid (50%)", "Fully Remote (100%)"])
         
     with col_input2:
@@ -117,27 +121,47 @@ with tab2:
         location = st.selectbox("Employee Location Base:", ["India (IN)", "United States (US)", "United Kingdom (GB)", "Germany (DE)", "Canada (CA)"])
 
     if st.button("🚀 Calculate Estimated Salary"):
-        base_pay = 45000 if "Analyst" in role else 65000
-        experience_multiplier = experience * 8500
-        location_weight = 1.6 if location == "United States (US)" else 0.7 if location == "India (IN)" else 1.1
-        size_bonus = 15000 if company_size == "Enterprise Tech Giant (L)" else 0
-        
-        # Calculate Remote Weight factor based on the user's radio selection
-        if remote_ratio == "On-site (0%)":
-            remote_weight = 0.95
-        elif remote_ratio == "Hybrid (50%)":
-            remote_weight = 1.00
-        else:
-            remote_weight = 1.05
+        try:
+            # 1. Load the model from your exact subfolder location ('models/model.pkl')
+            with open('models/model.pkl', 'rb') as f:
+                model = pickle.load(f)
             
-        # Apply the remote weight to the mathematical formula
-        predicted_salary = (base_pay + experience_multiplier + size_bonus) * location_weight * remote_weight
-        
-        st.success(f"### Predicted Salary Value: **${predicted_salary:,.2f} USD / year**")
-        st.metric(label="Calculated Base Value Target (USD)", value=f"${predicted_salary:,.0f}")
-        st.caption("ℹ️ Model Estimation Note: Outputs reflect predictive trends generated via Feature Engineering & Linear Regression modeling scripts.")
+            # 2. Map Ordinal Experience Feature exactly as trained in your document (Page 1)
+            exp_mapping = {"Entry-level": 0, "Mid-level": 1, "Senior": 2, "Executive": 3}
+            encoded_experience = exp_mapping[experience_label]
+            
+            # 3. Map Remote Work text choices back to numeric ratios
+            encoded_remote = 0 if remote_ratio == "On-site (0%)" else 50 if remote_ratio == "Hybrid (50%)" else 100
+            
+            # 4. Construct the precise Dataframe structure your model expects
+            input_data = pd.DataFrame([{
+                'experience_level': encoded_experience,
+                'remote_ratio': encoded_remote,
+                'job_title': role,
+                'company_size': company_size, 
+                'company_location': location
+            }])
+            
+            # 5. Run the actual machine learning prediction using your binary file
+            predicted_array = model.predict(input_data)
+            predicted_salary = float(predicted_array)
+            
+            # NOTE: If your notebook script used a target variable log transformation (Page 2), 
+            # remove the hashtag from the line below to convert it back to normal currency values:
+            # predicted_salary = np.expm1(predicted_salary) 
+            
+            # 6. Display the final real AI prediction outputs
+            st.success(f"### Predicted Salary Value: **${predicted_salary:,.2f} USD / year**")
+            st.metric(label="Calculated Base Value Target (USD)", value=f"${predicted_salary:,.0f}")
+            
+        except FileNotFoundError:
+            st.error("⚠️ The file 'models/model.pkl' was not found. Please make sure the 'models' folder exists in your GitHub repository.")
+        except Exception as e:
+            st.error(f"Prediction Pipeline Error: {e}")
+            st.info("Check if your input_data column names match your training dataframe columns perfectly.")
+            
+        st.caption("ℹ️ Model Estimation Note: Outputs reflect predictive trends generated via Feature Engineering & Tuned XGBoost Regression modeling scripts.")
 
-    
 # ------------------------------------------
 # TAB 3: SHOWCASING YOUR SQL CAPABILITIES
 # ------------------------------------------
