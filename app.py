@@ -170,20 +170,19 @@ with tab2:
                 if col in input_data.columns:
                     input_data[col] = input_data[col].astype('category')
             
-            # 5. Run the actual machine learning prediction using your binary file
+                       # 5. Run the actual machine learning prediction using your binary file
             predicted_array = model.predict(input_data)
-
-            # Safely extract the single value out of the array for NumPy 2.x
-            if hasattr(predicted_array, "flatten"):
-            predicted_salary = float(predicted_array.flatten()[0])
-            else:
-            predicted_salary = float(predicted_array)
-
+            
+            # Extracts the value cleanly in a single line without needing if-statements
+            predicted_salary = float(np.ravel(predicted_array)[0])
+            
+            # NOTE: If your notebook used a log transformation, un-comment the line below:
+            # predicted_salary = np.expm1(predicted_salary)
             
             # 6. Display the final real AI prediction outputs
             st.success(f"### Predicted Salary Value: **${predicted_salary:,.2f} USD / year**")
             st.metric(label="Calculated Base Value Target (USD)", value=f"${predicted_salary:,.0f}")
-            
+
         except FileNotFoundError:
             st.error("⚠️ The file 'models/model.pkl' was not found. Please make sure the 'models' folder exists in your GitHub repository.")
         except Exception as e:
