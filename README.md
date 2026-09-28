@@ -1,10 +1,8 @@
-import os
-
-readme_content = """# 📊 Data Science Salary Analytics & Prediction Engine
+ """# 📊 Data Science Salary Analytics & Prediction Engine
 
 An end-to-end cloud-hosted web application engineered to transform a serialized machine learning backend into an interactive, functional consumer product. This application bypasses basic flat-file parsing by managing an in-memory relational database runtime alongside a dynamically patched predictive interface.
 
-🚀 **Live Application Link:** [Launch the Streamlit Web Dashboard](https://9g63mvxmy4mt49h93bxbec.streamlit.app/)
+🚀 **Live Application Link:** [[Launch the Streamlit Web Dashboard](https://9g63mvxmy4mt49h93bxbec.streamlit.app/)]
 
 ---
 
