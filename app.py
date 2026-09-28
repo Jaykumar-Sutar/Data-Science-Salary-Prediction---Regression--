@@ -144,6 +144,9 @@ with tab2:
             # 3. Map Remote Work text choices back to numeric ratios
             encoded_remote = 0 if remote_ratio == "On-site (0%)" else 50 if remote_ratio == "Hybrid (50%)" else 100
             
+                       # 3. Map Remote Work text choices back to numeric ratios
+            encoded_remote = 0 if remote_ratio == "On-site (0%)" else 50 if remote_ratio == "Hybrid (50%)" else 100
+            
             # 4. Construct the precise Dataframe structure your model expects
             input_data = pd.DataFrame([{
                 'experience_level': encoded_experience,
@@ -152,6 +155,14 @@ with tab2:
                 'company_size': company_size, 
                 'company_location': location
             }])
+            
+            # 🛠️ CONVERT TEXT COLUMNS TO CATEGORY TYPE FOR XGBOOST
+            for col in ['job_title', 'company_size', 'company_location']:
+                input_data[col] = input_data[col].astype('category')
+            
+            # 5. Run the actual machine learning prediction using your binary file
+            predicted_array = model.predict(input_data)
+
             
             # 5. Run the actual machine learning prediction using your binary file
             predicted_array = model.predict(input_data)
