@@ -100,7 +100,7 @@ with tab1:
             st.info("💡 Insight: Noticeable upward progression curves scale linearly with seniority tier sets.")
 
 # ------------------------------------------
-# TAB 2: ML PREDICTION INTERFACE
+# TAB 2: # ML PREDICTION INTERFACE
 # ------------------------------------------
 with tab2:
     st.subheader("🔮 Predict Your Market Value")
@@ -122,12 +122,22 @@ with tab2:
         location_weight = 1.6 if location == "United States (US)" else 0.7 if location == "India (IN)" else 1.1
         size_bonus = 15000 if company_size == "Enterprise Tech Giant (L)" else 0
         
-        predicted_salary = (base_pay + experience_multiplier + size_bonus) * location_weight
+        # Calculate Remote Weight factor based on the user's radio selection
+        if remote_ratio == "On-site (0%)":
+            remote_weight = 0.95
+        elif remote_ratio == "Hybrid (50%)":
+            remote_weight = 1.00
+        else:
+            remote_weight = 1.05
+            
+        # Apply the remote weight to the mathematical formula
+        predicted_salary = (base_pay + experience_multiplier + size_bonus) * location_weight * remote_weight
         
         st.success(f"### Predicted Salary Value: **${predicted_salary:,.2f} USD / year**")
         st.metric(label="Calculated Base Value Target (USD)", value=f"${predicted_salary:,.0f}")
         st.caption("ℹ️ Model Estimation Note: Outputs reflect predictive trends generated via Feature Engineering & Linear Regression modeling scripts.")
 
+    
 # ------------------------------------------
 # TAB 3: SHOWCASING YOUR SQL CAPABILITIES
 # ------------------------------------------
