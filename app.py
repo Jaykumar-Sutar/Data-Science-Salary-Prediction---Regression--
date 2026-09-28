@@ -103,6 +103,7 @@ with tab1:
             st.info("💡 Insight: Noticeable upward progression curves scale linearly with seniority tier sets.")
 
 # ------------------------------------------
+# # ------------------------------------------
 # TAB 2: ML PREDICTION INTERFACE
 # ------------------------------------------
 with tab2:
@@ -112,8 +113,6 @@ with tab2:
     col_input1, col_input2 = st.columns(2)
     with col_input1:
         role = st.selectbox("Target Job Title:", ["Data Scientist", "Data Analyst", "Machine Learning Engineer", "Data Engineer", "AI Architect"])
-        
-        # Switched to a selectbox to align with your project document's Label Encoder
         experience_label = st.selectbox("Experience Level:", ["Entry-level", "Mid-level", "Senior", "Executive"])
         remote_ratio = st.radio("Remote Work Type:", ["On-site (0%)", "Hybrid (50%)", "Fully Remote (100%)"])
         
@@ -123,16 +122,12 @@ with tab2:
 
     if st.button("🚀 Calculate Estimated Salary"):
         try:
-                            if st.button("🚀 Calculate Estimated Salary"):
-        try:
             # 🛠️ FORCED COMPATIBILITY PATCH FOR SCIEKIT-LEARN VERSION MISMATCH
             import sklearn.metrics._scorer
             
-            # Create a mock function to satisfy pickle's internal scorer lookup
             def mock_passthrough(*args, **kwargs):
                 return None
                 
-            # Inject it into the environment so pickle loads without crashing
             if not hasattr(sklearn.metrics._scorer, '_passthrough_scorer'):
                 sklearn.metrics._scorer._passthrough_scorer = mock_passthrough
             if not hasattr(sklearn.metrics._scorer, '_PassthroughScorer'):
@@ -141,7 +136,6 @@ with tab2:
             # 1. Load your model file from your folder
             with open('models/model.pkl', 'rb') as f:
                 model = pickle.load(f)
-
             
             # 2. Map Ordinal Experience Feature exactly as trained in your document (Page 1)
             exp_mapping = {"Entry-level": 0, "Mid-level": 1, "Senior": 2, "Executive": 3}
@@ -162,10 +156,6 @@ with tab2:
             # 5. Run the actual machine learning prediction using your binary file
             predicted_array = model.predict(input_data)
             predicted_salary = float(predicted_array)
-            
-            # NOTE: If your notebook script used a target variable log transformation (Page 2), 
-            # remove the hashtag from the line below to convert it back to normal currency values:
-            # predicted_salary = np.expm1(predicted_salary) 
             
             # 6. Display the final real AI prediction outputs
             st.success(f"### Predicted Salary Value: **${predicted_salary:,.2f} USD / year**")
