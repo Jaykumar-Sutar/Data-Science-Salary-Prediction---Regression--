@@ -172,13 +172,19 @@ with tab2:
             st.success(f"### Predicted Salary Value: **${predicted_salary:,.2f} USD / year**")
             st.metric(label="Calculated Base Value Target (USD)", value=f"${predicted_salary:,.0f}")
             
-        except FileNotFoundError:
+                except FileNotFoundError:
             st.error("⚠️ The file 'models/model.pkl' was not found. Please make sure the 'models' folder exists in your GitHub repository.")
         except Exception as e:
             st.error(f"Prediction Pipeline Error: {e}")
-            st.info("Check if your input_data column names match your training dataframe columns perfectly.")
-            
-        st.caption("ℹ️ Model Estimation Note: Outputs reflect predictive trends generated via Feature Engineering & Tuned XGBoost Regression modeling scripts.")
+            # 🛠️ ADDED DEBUG ENGINE LINES
+            if 'model' in locals():
+                try:
+                    if hasattr(model, 'feature_names_in_'):
+                        st.info(f"📋 **The model expects these exact columns:** {list(model.feature_names_in_)}")
+                    elif hasattr(model, 'best_estimator_') and hasattr(model.best_estimator_, 'feature_names_in_'):
+                        st.info(f"📋 **The model expects these exact columns:** {list(model.best_estimator_.feature_names_in_)}")
+                except:
+                    pass
 
 # ------------------------------------------
 # TAB 3: SHOWCASING YOUR SQL CAPABILITIES
