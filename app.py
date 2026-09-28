@@ -1,3 +1,4 @@
+import xgboost
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -8,7 +9,7 @@ import warnings
 import os
 import glob
 import pickle  # Added to load the real model pickle file
-import xgboost
+
 warnings.filterwarnings("ignore")
 
 # ==========================================
